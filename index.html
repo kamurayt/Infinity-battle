@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>神をも超えし者</title>
+<style>
+:root{
+  --bg:#0d0d1a;--panel:#13132a;--panel2:#1a1a35;--panel3:#22223f;
+  --border:#2a2a5a;--accent:#e8c84a;--accent2:#f5dd7a;
+  --red:#e05050;--green:#4cd080;--blue:#5090e0;--gold:#e8c84a;
+  --text:#e0e0f0;--text2:#7878a8;
+  --c1:#7ddf64;--c2:#64b5f6;--c3:#ce93d8;--c4:#ffb74d;--c5:#fff176;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none;}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--text);
+  font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;font-size:13px;
+  max-width:480px;margin:0 auto;height:100dvh;}
+
+/* TOP */
+.topbar{background:#080818;border-bottom:1px solid var(--border);padding:5px 10px;
+  display:flex;align-items:center;gap:8px;flex-shrink:0;height:38px;}
+.top-avatar{width:28px;height:28px;border-radius:5px;background:linear-gradient(135deg,#3a3a6a,#5a5a9a);
+  display:flex;align-items:center;justify-content:center;font-size:17px;border:1px solid #5a5aaa;}
+.top-lv{font-size:12px;font-weight:700;color:var(--accent);}
+.top-expbar{flex:1;height:5px;background:#1a1a3a;border-radius:3px;overflow:hidden;border:1px solid #2a2a4a;}
+.top-expfill{height:100%;background:linear-gradient(90deg,#3366cc,#5588ee);transition:width .3s;}
+.top-res{display:flex;gap:6px;margin-left:auto;}
+.res-chip{display:flex;align-items:center;gap:3px;background:#1a1a3a;border:1px solid #3a3a6a;
+  border-radius:10px;padding:2px 8px;font-size:11px;font-weight:700;}
+.res-chip.gld{color:var(--gold);}
+.res-chip.gem{color:#b39ddb;}
+
+/* BATTLE */
+.battle{flex:1 1 0;min-height:0;position:relative;overflow:hidden;
+  background:linear-gradient(180deg,#05051a,#080820);}
+.stage-lbl{position:absolute;top:6px;left:50%;transform:translateX(-50%);
+  background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.15);border-radius:4px;
+  padding:2px 12px;font-size:10px;color:rgba(255,255,255,.7);letter-spacing:1px;}
+.job-lbl{position:absolute;top:6px;right:8px;background:rgba(232,200,74,.15);
+  border:1px solid rgba(232,200,74,.4);border-radius:8px;padding:2px 8px;
+  font-size:9px;color:var(--accent);cursor:pointer;}
+.enemy-hpbar{position:absolute;top:30px;left:12px;right:12px;}
+.enemy-hpbar-bg{height:10px;background:#1a0808;border:1px solid #5a2020;border-radius:5px;overflow:hidden;}
+.enemy-hpbar-fill{height:100%;background:linear-gradient(90deg,#991a1a,#dd3333);transition:width .2s;}
+.enemy-hptxt{font-size:9px;color:rgba(255,255,255,.5);text-align:center;margin-top:2px;}
+.chars{position:absolute;bottom:52px;left:0;right:0;display:flex;
+  justify-content:space-around;align-items:flex-end;padding:0 20px;}
+.player-wrap,.enemy-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.sprite{font-size:46px;}
+.sprite.player{animation:idle 1.5s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(80,144,224,.4));}
+.sprite.enemy{animation:efloat .8s ease-in-out infinite;filter:drop-shadow(0 4px 8px rgba(224,80,80,.4));}
+@keyframes idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes efloat{0%,100%{transform:scaleX(-1) translateX(0)}50%{transform:scaleX(-1) translateX(-3px)}}
+.nametag{border-radius:8px;padding:2px 8px;font-size:9px;}
+.nametag.p{background:rgba(80,144,224,.3);border:1px solid rgba(80,144,224,.5);color:#aaccff;}
+.nametag.e{background:rgba(224,80,80,.3);border:1px solid rgba(224,80,80,.5);color:#ffaaaa;}
+.mini-hpbar{width:60px;height:5px;background:#1a1a3a;border-radius:3px;overflow:hidden;}
+.mini-hpfill{height:100%;border-radius:3px;transition:width .2s;}
+.mini-hpfill.p{background:linear-gradient(90deg,#207040,#4cd080);}
+.mini-hpfill.e{background:linear-gradient(90deg,#881a1a,#dd3333);}
+.ground{position:absolute;bottom:48px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(60,80,120,.5),transparent);}
+.dmg-pop{position:absolute;font-weight:900;pointer-events:none;
+  animation:dpop .9s ease-out forwards;z-index:10;text-shadow:0 2px 6px rgba(0,0,0,.9);}
+@keyframes dpop{0%{opacity:1;transform:translate(-50%,0) scale(1.1)}100%{opacity:0;transform:translate(-50%,-70px) scale(.8)}}
+.gain-pop{position:absolute;font-weight:700;pointer-events:none;font-size:11px;
+  animation:gpop 1.2s ease-out forwards;z-index:9;}
+@keyframes gpop{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-40px)}}
+.scene-bottom{position:absolute;bottom:0;left:0;right:0;background:rgba(5,5,20,.85);
+  border-top:1px solid rgba(60,60,100,.5);padding:4px 10px;display:flex;align-items:center;gap:8px;}
+.s-lv{font-size:11px;color:var(--text2);}
+.s-lv strong{color:var(--accent);font-size:13px;}
+.s-bars{flex:1;display:flex;flex-direction:column;gap:2px;}
+.s-bar-row{display:flex;align-items:center;gap:4px;}
+.s-bar-lbl{font-size:8px;color:var(--text2);width:18px;}
+.s-bar-bg{flex:1;height:6px;background:#0a0a1a;border-radius:3px;overflow:hidden;border:1px solid #1a1a3a;}
+.s-bar-fill{height:100%;border-radius:3px;transition:width .3s;}
+.s-bar-fill.hp{background:linear-gradient(90deg,#aa2222,#ee4444);}
+.s-bar-fill.exp{background:linear-gradient(90deg,#2255aa,#4488ee);}
+.s-bar-val{font-size:8px;color:var(--text2);width:55px;text-align:right;}
+.s-pt{font-size:9px;color:var(--text2);text-align:right;}
+
+/* PANEL */
+.panel{background:var(--panel);border-top:2px solid var(--border);flex-shrink:0;display:flex;flex-direction:column;height:48%;min-height:0;}
+.tabs{display:flex;background:#0a0a1a;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;}
+.tab{flex:1;min-width:0;padding:7px 2px;font-size:10px;font-weight:700;color:var(--text2);
+  text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.panel-body{flex:1;overflow-y:auto;min-height:0;}
+.panel-body::-webkit-scrollbar{width:3px;}
+.panel-body::-webkit-scrollbar-thumb{background:var(--border);}
+.tab-pane{display:none;padding:8px;}
+.tab-pane.active{display:block;}
+
+/* 強化リスト */
+.up-row{background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.up-ico{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:22px;flex-shrink:0;border:1px solid var(--border);}
+.up-mid{flex:1;min-width:0;}
+.up-name{font-size:12px;font-weight:700;margin-bottom:2px;}
+.up-stat{font-size:9px;color:var(--text2);}
+.up-next{font-size:9px;color:var(--green);margin-top:1px;}
+.up-bar-bg{height:4px;background:#0a0a1a;border-radius:2px;overflow:hidden;margin-top:3px;}
+.up-bar-fill{height:100%;background:linear-gradient(90deg,var(--blue),#88bbff);border-radius:2px;}
+.gold-btn{background:radial-gradient(circle at 40% 35%,#f5dd7a,#c8a030);border:none;
+  border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .12s;box-shadow:0 2px 8px rgba(200,160,48,.4);
+  font-size:11px;font-weight:900;color:#4a2a00;flex-direction:column;line-height:1.1;flex-shrink:0;}
+.gold-btn:active{transform:scale(.9);}
+.gold-btn.off{opacity:.3;cursor:not-allowed;box-shadow:none;}
+.gold-btn-cost{font-size:7px;}
+
+/* Lv振り分け */
+.pt-head{background:linear-gradient(135deg,#0f1a0f,#1a2a1a);border:1px solid #2a5a2a;
+  border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.pt-num{font-size:26px;font-weight:900;color:var(--green);}
+.pt-row{background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;display:flex;align-items:center;gap:10px;cursor:pointer;margin-bottom:5px;transition:all .12s;}
+.pt-row:active{transform:scale(.97);}
+.pt-row.off{opacity:.3;cursor:not-allowed;}
+.pt-ico{font-size:22px;width:36px;text-align:center;}
+.pt-info{flex:1;}
+.pt-nm{font-size:12px;font-weight:700;}
+.pt-val{font-size:9px;color:var(--green);margin-top:1px;}
+.pt-plus{width:32px;height:32px;background:linear-gradient(135deg,#3a6a3a,#4a8a4a);
+  border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#fff;}
+
+/* クリティカル */
+.crit-row{background:var(--panel2);border:1px solid var(--border);border-radius:8px;
+  padding:8px 10px;display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.crit-row.def-active{border-color:var(--accent);}
+.crit-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.crit-mid{flex:1;min-width:0;}
+.crit-name{font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px;}
+.def-badge{font-size:7px;background:var(--accent);color:#000;border-radius:3px;padding:1px 4px;font-weight:900;}
+.lock-badge{font-size:9px;color:var(--text2);}
+.crit-stat{font-size:9px;color:var(--text2);margin-top:2px;}
+.crit-rbar-bg{height:4px;background:#0a0a1a;border-radius:2px;overflow:hidden;margin-top:3px;}
+.crit-rbar-fill{height:100%;border-radius:2px;transition:width .3s;}
+.crit-btns{display:flex;flex-direction:column;gap:3px;}
+.sm-btn{background:var(--panel3);border:1px solid var(--border);border-radius:5px;
+  padding:4px 8px;font-size:9px;color:var(--text);cursor:pointer;white-space:nowrap;transition:all .12s;display:flex;flex-direction:column;align-items:center;}
+.sm-btn:active{transform:scale(.9);}
+.sm-btn.off{opacity:.25;cursor:not-allowed;}
+.sm-btn-cost{font-size:7px;color:var(--accent);}
+
+/* スキルツリー */
+.skill-pt-head{background:linear-gradient(135deg,#1a1a3a,#2a2050);border:1px solid #5555aa;
+  border-radius:8px;padding:10px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.skill-pt-num{font-size:24px;font-weight:900;color:#b39ddb;}
+.skill-cat-title{font-size:10px;color:var(--text2);letter-spacing:1px;margin-bottom:6px;
+  padding:4px 8px;background:var(--panel3);border-radius:6px;}
+.skill-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+.skill-node{background:var(--panel2);border:2px solid var(--border);border-radius:10px;
+  padding:8px 6px;text-align:center;cursor:pointer;transition:all .15s;}
+.skill-node:active{transform:scale(.94);}
+.skill-node.on{border-color:var(--accent);background:rgba(232,200,74,.08);}
+.skill-node.maxed{border-color:var(--green);background:rgba(76,208,128,.08);}
+.skill-node.locked{opacity:.35;cursor:not-allowed;}
+.skill-node-ico{font-size:20px;margin-bottom:3px;}
+.skill-node-nm{font-size:9px;font-weight:700;}
+.skill-node-desc{font-size:8px;color:var(--text2);margin-top:1px;line-height:1.3;}
+.skill-node-lv{font-size:8px;color:var(--accent);margin-top:3px;}
+
+/* ペット */
+.pet-slots{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;}
+.pet-slot{background:var(--panel2);border:2px solid var(--border);border-radius:10px;
+  padding:10px;text-align:center;cursor:pointer;transition:all .15s;}
+.pet-slot.filled{border-color:var(--accent);}
+.pet-slot:active{transform:scale(.96);}
+.pet-slot-ico{font-size:30px;margin-bottom:4px;}
+.pet-slot-nm{font-size:11px;font-weight:700;}
+.pet-slot-stat{font-size:9px;color:var(--green);margin-top:2px;}
+.pet-inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:8px;}
+.pet-card{background:var(--panel2);border:2px solid var(--border);border-radius:10px;
+  padding:7px 5px;text-align:center;cursor:pointer;transition:all .15s;}
+.pet-card:active{transform:scale(.94);}
+.pet-card.sel{border-color:var(--accent);background:rgba(232,200,74,.1);}
+.pet-card-ico{font-size:26px;}
+.pet-card-rar{font-size:7px;font-weight:700;border-radius:3px;padding:1px 4px;margin-top:2px;display:inline-block;}
+.pet-card-nm{font-size:8px;font-weight:700;margin-top:2px;}
+.pet-card-stat{font-size:8px;color:var(--green);}
+.pet-equip-btn{width:100%;background:linear-gradient(135deg,#3a6a3a,#5aaa5a);border:none;
+  border-radius:8px;padding:9px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;margin-top:4px;}
+.pet-equip-btn:active{transform:scale(.97);}
+.pet-gacha-btn{width:100%;background:linear-gradient(135deg,#2a3a5a,#3a5a8a);border:none;
+  border-radius:8px;padding:10px;font-size:12px;font-weight:900;color:#88ccff;cursor:pointer;margin-top:6px;}
+.pet-gacha-btn:active{transform:scale(.97);}
+
+/* 装備 */
+.eq-slot{background:var(--panel2);border:1px solid var(--border);border-radius:10px;
+  padding:10px;display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.eq-slot-ico{width:44px;height:44px;border-radius:8px;background:var(--panel3);
+  display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid var(--border);}
+.eq-slot-info{flex:1;}
+.eq-slot-type{font-size:9px;color:var(--text2);}
+.eq-slot-nm{font-size:12px;font-weight:700;}
+.eq-slot-stat{font-size:9px;color:var(--green);margin-top:2px;}
+.eq-change-btn{background:var(--panel3);border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;font-size:10px;color:var(--text);cursor:pointer;}
+.eq-change-btn:active{transform:scale(.94);}
+.inv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:8px;}
+.inv-card{background:var(--panel2);border:2px solid var(--border);border-radius:8px;
+  padding:6px 4px;text-align:center;cursor:pointer;transition:all .12s;}
+.inv-card:active{transform:scale(.94);}
+.inv-card.sel{border-color:var(--accent)!important;background:#2a2a00;}
+.inv-card-ico{font-size:22px;}
+.inv-card-rar{font-size:7px;font-weight:700;border-radius:3px;padding:1px 3px;display:inline-block;margin-top:2px;}
+.inv-card-nm{font-size:7px;color:var(--text2);margin-top:1px;}
+.inv-card-stat{font-size:7px;color:var(--green);}
+.equip-confirm-btn{width:100%;background:linear-gradient(135deg,#3a6a3a,#5aaa5a);border:none;
+  border-radius:8px;padding:9px;font-size:12px;font-weight:900;color:#fff;cursor:pointer;margin-top:6px;}
+.equip-confirm-btn:active{transform:scale(.97);}
+
+/* ガチャ */
+.gacha-lv-card{background:linear-gradient(135deg,#1a1a3a,#2a2050);border:2px solid #7755cc;
+  border-radius:12px;padding:12px;margin-bottom:12px;}
+.gacha-lv-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.gacha-lv-num{font-size:22px;font-weight:900;color:#b39ddb;}
+.gacha-lv-bar-bg{height:8px;background:#0a0a1a;border-radius:4px;overflow:hidden;border:1px solid #3a2a5a;}
+.gacha-lv-bar-fill{height:100%;background:linear-gradient(90deg,#7755cc,#bb88ff);border-radius:4px;transition:width .3s;}
+.gacha-lv-info{font-size:9px;color:#b39ddb;margin-top:4px;}
+.gacha-rate-info{font-size:9px;color:var(--text2);margin:6px 0;}
+.gacha-btns{display:flex;gap:6px;margin-bottom:10px;}
+.gacha-btn{flex:1;border:none;border-radius:10px;padding:10px 4px;font-size:12px;font-weight:900;
+  cursor:pointer;transition:all .12s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.gacha-btn:active{transform:scale(.94);}
+.gacha-btn.x1{background:linear-gradient(135deg,#3a3a6a,#5a5a9a);color:#c0c0ff;}
+.gacha-btn.x10{background:linear-gradient(135deg,#3a6a3a,#5a9a5a);color:#c0ffc0;}
+.gacha-btn.x100{background:linear-gradient(135deg,#6a3a3a,#9a5a5a);color:#ffc0c0;}
+.gcost{font-size:9px;opacity:.8;}
+.gacha-result{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;min-height:40px;}
+.r-card{background:var(--panel2);border-radius:8px;border:2px solid var(--border);padding:4px;
+  display:flex;flex-direction:column;align-items:center;gap:2px;animation:cpop .3s ease-out;}
+@keyframes cpop{0%{transform:scale(0) rotate(-10deg);opacity:0}100%{transform:scale(1);opacity:1}}
+.r-card-ico{font-size:22px;}
+.r-card-rar{font-size:7px;font-weight:700;border-radius:3px;padding:1px 3px;}
+.r-card-nm{font-size:7px;color:var(--text2);text-align:center;line-height:1.2;}
+.rN{border-color:#555!important;}.rN .r-card-rar{background:#333;color:#aaa;}
+.rR{border-color:#4a4!important;}.rR .r-card-rar{background:#1a3a1a;color:#7ddf64;}
+.rE{border-color:#44a!important;}.rE .r-card-rar{background:#1a1a4a;color:#64b5f6;}
+.rL{border-color:#a4a!important;}.rL .r-card-rar{background:#2a1a4a;color:#ce93d8;}
+.rM{border-color:#aa4!important;background:linear-gradient(135deg,#1a1a00,#2a2a00)!important;}
+.rM .r-card-rar{background:#3a3a00;color:#fff176;}
+
+/* 職業モーダル */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:flex;
+  align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;}
+.overlay.open{opacity:1;pointer-events:all;}
+.sheet{width:100%;max-width:480px;margin:0 auto;background:var(--panel);
+  border-top:2px solid var(--accent);border-radius:16px 16px 0 0;
+  padding:16px 12px 28px;transform:translateY(100%);transition:transform .3s;
+  max-height:90dvh;overflow-y:auto;position:relative;}
+.overlay.open .sheet{transform:translateY(0);}
+.sheet-title{font-size:16px;font-weight:900;color:var(--accent);text-align:center;margin-bottom:12px;}
+.sheet-close{position:absolute;top:12px;right:14px;font-size:20px;cursor:pointer;color:var(--text2);}
+.job-cur{background:linear-gradient(135deg,#1a1a3a,#2a2a5a);border:2px solid var(--accent);
+  border-radius:12px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+.job-cur-ico{font-size:36px;}
+.job-cur-nm{font-size:18px;font-weight:900;color:var(--accent2);}
+.job-cur-sub{font-size:9px;color:var(--text2);margin-top:2px;}
+.job-next-card{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px;}
+.job-next-lbl{font-size:9px;color:var(--text2);letter-spacing:1px;margin-bottom:4px;}
+.job-next-nm{font-size:15px;font-weight:900;margin-bottom:8px;}
+.job-mul-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+.job-mul-chip{background:var(--panel3);border:1px solid var(--border);border-radius:6px;padding:3px 8px;font-size:9px;color:var(--green);}
+.quest-row{background:var(--panel3);border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+  display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.quest-row.done{border-color:#3a6a3a;}
+.quest-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:11px;}
+.quest-row.done .quest-check{background:#2a4a2a;border-color:#4a9a4a;color:var(--green);}
+.quest-txt{font-size:11px;}
+.quest-prog{font-size:9px;color:var(--text2);margin-top:2px;}
+.quest-prog b{color:var(--accent);}
+.job-tf-btn{width:100%;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:900;
+  cursor:pointer;margin-top:10px;transition:all .12s;background:linear-gradient(135deg,#2a3a2a,#3a4a3a);color:#556655;pointer-events:none;}
+.job-tf-btn.ready{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;pointer-events:all;box-shadow:0 4px 15px rgba(232,200,74,.4);}
+.job-tf-btn.ready:active{transform:scale(.97);}
+.job-max{background:linear-gradient(135deg,#1a2a1a,#2a4a2a);border:2px solid var(--green);border-radius:12px;padding:14px;text-align:center;font-size:14px;color:var(--green);font-weight:700;}
+
+/* ログ */
+.log-box{background:#05050f;border:1px solid var(--border);border-radius:8px;padding:6px 8px;
+  height:100%;overflow-y:auto;font-size:10px;line-height:1.8;min-height:120px;}
+.log-box::-webkit-scrollbar{width:3px;}
+.log-box::-webkit-scrollbar-thumb{background:var(--border);}
+.log-n{color:var(--text2);}.log-d{color:var(--text);}.log-c{color:var(--c3);}
+.log-g{color:var(--c5);font-weight:700;}.log-k{color:var(--accent);}.log-l{color:var(--green);}
+
+/* ナビ */
+.nav{background:#06060f;border-top:2px solid var(--border);display:flex;flex-shrink:0;height:50px;}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1px;cursor:pointer;font-size:8px;color:var(--text2);border-right:1px solid var(--border);transition:all .12s;}
+.nav-btn:last-child{border-right:none;}
+.nav-btn.active{color:var(--accent);background:rgba(232,200,74,.05);}
+.nav-btn .nico{font-size:18px;}
+
+/* idle banner */
+.idle-banner{background:linear-gradient(135deg,#1a1200,#2a2000);border:1px solid #4a3a00;
+  border-radius:8px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.idle-gold{font-size:13px;font-weight:900;color:var(--gold);}
+.idle-sub{font-size:9px;color:var(--text2);}
+.idle-btn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#000;border:none;
+  border-radius:8px;padding:7px 14px;font-size:11px;font-weight:900;cursor:pointer;transition:all .12s;}
+.idle-btn:active{transform:scale(.94);}
+
+/* ステータス */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.stat-card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.stat-card-lbl{font-size:9px;color:var(--text2);margin-bottom:2px;}
+.stat-card-val{font-size:17px;font-weight:900;}
+.c-atk{color:#ee5050;}.c-def{color:#5090ee;}.c-hp{color:#50d080;}.c-exp{color:#ce93d8;}.c-gld{color:var(--gold);}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="top-avatar">🧙</div>
+  <div class="top-lv">Lv.<span id="tLv">1</span></div>
+  <div class="top-expbar"><div class="top-expfill" id="tExpBar" style="width:0%"></div></div>
+  <div class="top-res">
+    <div class="res-chip gld">🪙<span id="tGold">0</span></div>
+    <div class="res-chip gem">💎<span id="tGem">0</span></div>
+  </div>
+</div>
+
+<div class="battle" id="battleArea">
+  <div class="stage-lbl" id="stageLbl">STAGE 1</div>
+  <div class="job-lbl" id="jobLbl" onclick="openJobModal()">一般人 ▶</div>
+  <div class="enemy-hpbar">
+    <div class="enemy-hpbar-bg"><div class="enemy-hpbar-fill" id="eHpBar" style="width:100%"></div></div>
+    <div class="enemy-hptxt" id="eHpTxt">30/30</div>
+  </div>
+  <div class="chars">
+    <div class="player-wrap">
+      <div class="sprite player">🧙</div>
+      <div class="nametag p">プレイヤー</div>
+      <div class="mini-hpbar"><div class="mini-hpfill p" id="pHpMini" style="width:100%"></div></div>
+    </div>
+    <div class="enemy-wrap">
+      <div class="sprite enemy" id="eSprite">👺</div>
+      <div class="nametag e" id="eNametag">ゴブリン</div>
+      <div class="mini-hpbar"><div class="mini-hpfill e" id="eHpMini" style="width:100%"></div></div>
+    </div>
+  </div>
+  <div class="ground"></div>
+  <div class="scene-bottom">
+    <div class="s-lv">Lv.<strong id="sLv">1</strong></div>
+    <div class="s-bars">
+      <div class="s-bar-row">
+        <span class="s-bar-lbl">HP</span>
+        <div class="s-bar-bg"><div class="s-bar-fill hp" id="pHpBar" style="width:100%"></div></div>
+        <span class="s-bar-val" id="pHpTxt">100/100</span>
+      </div>
+      <div class="s-bar-row">
+        <span class="s-bar-lbl">EXP</span>
+        <div class="s-bar-bg"><div class="s-bar-fill exp" id="pExpBar" style="width:0%"></div></div>
+        <span class="s-bar-val" id="pExpTxt">0/100</span>
+      </div>
+    </div>
+    <div class="s-pt">Pt:<span id="sPt" style="color:var(--green);font-weight:700;">0</span></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="tabs">
+    <div class="tab active" onclick="sw('up')">強化</div>
+    <div class="tab" onclick="sw('cr')">クリティカル</div>
+    <div class="tab" onclick="sw('pt')">成長</div>
+    <div class="tab" onclick="sw('sk')">スキル</div>
+    <div class="tab" onclick="sw('pet')">ペット</div>
+    <div class="tab" onclick="sw('eq')">装備</div>
+    <div class="tab" onclick="sw('st')">状態</div>
+    <div class="tab" onclick="sw('lg')">ログ</div>
+  </div>
+  <div class="panel-body">
+    <div class="tab-pane active" id="pane-up"></div>
+    <div class="tab-pane" id="pane-cr"></div>
+    <div class="tab-pane" id="pane-pt"></div>
+    <div class="tab-pane" id="pane-sk"></div>
+    <div class="tab-pane" id="pane-pet"></div>
+    <div class="tab-pane" id="pane-eq"></div>
+    <div class="tab-pane" id="pane-st"></div>
+    <div class="tab-pane" id="pane-lg"><div class="log-box" id="logBox"></div></div>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-btn active" onclick="sw('up');navActive(this)"><span class="nico">👤</span>キャラ</div>
+  <div class="nav-btn" onclick="sw('sk');navActive(this)"><span class="nico">⚡</span>スキル</div>
+  <div class="nav-btn" onclick="sw('eq');navActive(this)"><span class="nico">⚔</span>装備</div>
+  <div class="nav-btn" onclick="openJobModal()"><span class="nico">👔</span>職業</div>
+  <div class="nav-btn" onclick="sw('pet');navActive(this)"><span class="nico">🐾</span>ペット</div>
+</div>
+
+<!-- 職業モーダル -->
+<div class="overlay" id="jobOverlay">
+  <div class="sheet">
+    <div class="sheet-title">⚔ 職業・転職</div>
+    <span class="sheet-close" onclick="closeJobModal()">✕</span>
+    <div id="jobBody"></div>
+  </div>
+</div>
+
+<!-- ガチャモーダル -->
+<div class="overlay" id="gachaOverlay">
+  <div class="sheet">
+    <div class="sheet-title">🎲 装備ガチャ</div>
+    <span class="sheet-close" onclick="closeGacha()">✕</span>
+    <div class="gacha-lv-card">
+      <div class="gacha-lv-row">
+        <div><div style="font-size:9px;color:var(--text2)">ガチャレベル</div><div class="gacha-lv-num">Lv.<span id="gLvNum">1</span></div></div>
+        <div style="text-align:right;font-size:10px;color:var(--text2)">累計<span id="gTotal" style="color:#b39ddb;font-weight:700">0</span>回</div>
+      </div>
+      <div class="gacha-lv-bar-bg"><div class="gacha-lv-bar-fill" id="gLvBar" style="width:0%"></div></div>
+      <div class="gacha-lv-info" id="gLvInfo">次のLvまで: 10回</div>
+    </div>
+    <div class="gacha-rate-info" id="gRateInfo"></div>
+    <div class="gacha-btns">
+      <button class="gacha-btn x1" onclick="doGacha(1)">1回<span class="gcost">💎30</span></button>
+      <button class="gacha-btn x10" onclick="doGacha(10)">10回<span class="gcost">💎300</span></button>
+      <button class="gacha-btn x100" onclick="doGacha(100)">100回<span class="gcost">💎3000</span></button>
+    </div>
+    <div class="gacha-result" id="gResult"></div>
+  </div>
+</div>
+
+<!-- 装備変更モーダル -->
+<div class="overlay" id="eqOverlay">
+  <div class="sheet">
+    <div class="sheet-title" id="eqModalTitle">装備変更</div>
+    <span class="sheet-close" onclick="closeEqModal()">✕</span>
+    <div class="inv-grid" id="eqInvGrid"></div>
+    <button class="equip-confirm-btn" onclick="doEquip()">この装備をつける</button>
+  </div>
+</div>
+
+<script>
+// ===================== DATA =====================
+const SAVE_KEY = 'beyondGods_v2';
+
+var G = {
+  gold:0, gem:0, lv:1, exp:0, pt:0, skillPt:0,
+  hp:100, stage:1,
+  eHp:0, eMax:0, eName:'', eIco:'👺',
+  lastTime: Date.now(),
+  upLv: {hp:0, atk:0, def:0, expR:0, goldR:0},
+  ptSt: {hp:0, atk:0, def:0},
+  crits: [
+    {name:'クリティカル',        rate:0, mul:1.5, rateLv:0, mulLv:0, col:'#7ddf64'},
+    {name:'ストロングクリティカル', rate:0, mul:2.0, rateLv:0, mulLv:0, col:'#64b5f6'},
+    {name:'スーパークリティカル',  rate:0, mul:3.0, rateLv:0, mulLv:0, col:'#ce93d8'},
+    {name:'ハイパークリティカル',  rate:0, mul:4.5, rateLv:0, mulLv:0, col:'#ffb74d'},
+    {name:'GODクリティカル',      rate:0, mul:7.0, rateLv:0, mulLv:0, col:'#fff176'},
+  ],
+  skillLv: {},
+  jobIdx: 0,
+  bossKills: {},
+  gachaLv: 1, gachaExp: 0, gachaTotal: 0,
+  inventory: [],
+  equipped: {weapon:null, armor:null, accessory:null},
+  petInv: [],
+  equippedPets: [null, null],
+  _eqSlot: null, _selInv: null,
+  _selPetSlot: null, _selPet: null,
+};
+
+// ===================== JOBS =====================
+var JOBS = [
+  {name:'一般人',       ico:'🧑', mul:{hp:1.0,atk:1.0,def:1.0,gld:1.0,exp:1.0},
+   quests:[{label:'チュートリアル完了',type:'stage',need:1}]},
+  {name:'迷子の剣士',   ico:'🗡', mul:{hp:1.1,atk:1.2,def:1.1,gld:1.1,exp:1.2},
+   quests:[{label:'ステージ20クリア',type:'stage',need:20},{label:'ゴブリン王を討伐',type:'boss',need:1,boss:'ゴブリン王'}]},
+  {name:'血盟の戦士',   ico:'⚔', mul:{hp:1.3,atk:1.5,def:1.3,gld:1.2,exp:1.3},
+   quests:[{label:'ステージ50クリア',type:'stage',need:50},{label:'オーガ将軍を討伐',type:'boss',need:1,boss:'オーガ将軍'}]},
+  {name:'魔獣狩人',     ico:'🏹', mul:{hp:1.6,atk:1.8,def:1.5,gld:1.4,exp:1.5},
+   quests:[{label:'ステージ100クリア',type:'stage',need:100},{label:'魔狼王フェンリルを討伐',type:'boss',need:1,boss:'魔狼王フェンリル'}]},
+  {name:'ソウルイーター',ico:'💀', mul:{hp:2.0,atk:2.3,def:1.8,gld:1.6,exp:1.7},
+   quests:[{label:'ステージ150クリア',type:'stage',need:150},{label:'竜騎士バルドルを討伐',type:'boss',need:1,boss:'竜騎士バルドル'}]},
+  {name:'禁忌の覇者',   ico:'🔥', mul:{hp:2.5,atk:3.0,def:2.2,gld:1.9,exp:2.0},
+   quests:[{label:'ステージ200クリア',type:'stage',need:200},{label:'魔将軍ザルゴスを討伐',type:'boss',need:1,boss:'魔将軍ザルゴス'}]},
+  {name:'混沌の王',     ico:'👿', mul:{hp:3.2,atk:3.8,def:2.8,gld:2.3,exp:2.4},
+   quests:[{label:'ステージ250クリア',type:'stage',need:250},{label:'暗黒騎士ヴァルムを討伐',type:'boss',need:1,boss:'暗黒騎士ヴァルム'}]},
+  {name:'ミスブレイカー',ico:'⚡', mul:{hp:4.0,atk:5.0,def:3.5,gld:2.8,exp:2.8},
+   quests:[{label:'ステージ300クリア',type:'stage',need:300},{label:'真・魔王アビスを討伐',type:'boss',need:1,boss:'真・魔王アビス'}]},
+  {name:'神をも超えし者',ico:'🌟',mul:{hp:5.5,atk:7.0,def:5.0,gld:3.5,exp:3.5}, quests:[]},
+];
+
+// ===================== ITEMS =====================
+var RARITY = [
+  {id:'N',name:'ノーマル',  col:'#888', unlockLv:1, rate:55},
+  {id:'R',name:'レア',      col:'#7ddf64',unlockLv:1,rate:30},
+  {id:'E',name:'エピック',  col:'#64b5f6',unlockLv:1,rate:14},
+  {id:'L',name:'レジェンド',col:'#ce93d8',unlockLv:6,rate:5},
+  {id:'M',name:'ミシック',  col:'#fff176',unlockLv:11,rate:1},
+];
+var ITEMS = {
+  weapon:[
+    {ico:'⚔',name:'鉄の剣',   stat:'atk',v:15},
+    {ico:'🗡',name:'銀の短剣', stat:'atk',v:25},
+    {ico:'🪄',name:'魔法の杖', stat:'atk',v:40},
+    {ico:'🔱',name:'聖なる槍', stat:'atk',v:65},
+    {ico:'⚡',name:'雷神の剣', stat:'atk',v:100},
+  ],
+  armor:[
+    {ico:'🛡',name:'木の盾',   stat:'def',v:10},
+    {ico:'🧥',name:'革の鎧',   stat:'def',v:20},
+    {ico:'🪖',name:'鉄の鎧',   stat:'def',v:35},
+    {ico:'🔮',name:'魔法の盾', stat:'def',v:55},
+    {ico:'👑',name:'神聖の鎧', stat:'def',v:85},
+  ],
+  accessory:[
+    {ico:'💍',name:'銅の指輪',   stat:'hp',  v:100},
+    {ico:'📿',name:'魔石の首飾', stat:'hp',  v:200},
+    {ico:'🌟',name:'星のお守り', stat:'expR',v:0.1},
+    {ico:'🍀',name:'幸運のお守', stat:'goldR',v:0.1},
+    {ico:'💫',name:'神の瞳',     stat:'hp',  v:400},
+  ],
+};
+var PETS = [
+  {ico:'🟢',name:'スライム',  stat:'atk',v:5 },
+  {ico:'🦇',name:'コウモリ',  stat:'atk',v:8 },
+  {ico:'🦅',name:'フェニックス',stat:'hp',v:100},
+  {ico:'🐺',name:'ウルフ',    stat:'atk',v:12},
+  {ico:'🐉',name:'ドラゴン',  stat:'atk',v:20},
+  {ico:'🦄',name:'ユニコーン',stat:'expR',v:0.1},
+  {ico:'🗿',name:'ゴーレム',  stat:'def',v:15},
+  {ico:'😇',name:'天使',      stat:'hp', v:200},
+  {ico:'😈',name:'悪魔',      stat:'atk',v:30},
+  {ico:'🌟',name:'神獣',      stat:'atk',v:50},
+];
+
+// ===================== SKILLS =====================
+var SKILL_DEFS = [
+  {id:'s1',name:'剛力',    ico:'💪',cat:'攻撃',maxLv:10,cost:1,req:null, eff:'atk', val:0.05, desc:'ATK+5%/Lv'},
+  {id:'s2',name:'鬼神の刃',ico:'⚔',cat:'攻撃',maxLv:10,cost:2,req:'s1',  eff:'atk', val:0.10, desc:'ATK+10%/Lv'},
+  {id:'s3',name:'神速',    ico:'⚡',cat:'攻撃',maxLv:5, cost:2,req:'s1',  eff:'critB',val:2,   desc:'クリ率+2%/Lv'},
+  {id:'s4',name:'滅神斬',  ico:'🗡',cat:'攻撃',maxLv:5, cost:3,req:'s2',  eff:'atk', val:0.20, desc:'ATK+20%/Lv'},
+  {id:'s5',name:'鉄壁',    ico:'🛡',cat:'防御',maxLv:10,cost:1,req:null,  eff:'def', val:0.05, desc:'DEF+5%/Lv'},
+  {id:'s6',name:'不動',    ico:'🗿',cat:'防御',maxLv:10,cost:2,req:'s5',  eff:'hp',  val:0.10, desc:'HP+10%/Lv'},
+  {id:'s7',name:'聖盾',    ico:'✨',cat:'防御',maxLv:5, cost:3,req:'s6',  eff:'def', val:0.15, desc:'DEF+15%/Lv'},
+  {id:'s8',name:'商才',    ico:'🪙',cat:'収益',maxLv:10,cost:1,req:null,  eff:'gld', val:0.08, desc:'GOLD+8%/Lv'},
+  {id:'s9',name:'学識',    ico:'📚',cat:'収益',maxLv:10,cost:1,req:null,  eff:'exp', val:0.08, desc:'EXP+8%/Lv'},
+  {id:'s10',name:'黄金の手',ico:'👑',cat:'収益',maxLv:5,cost:3,req:'s8',  eff:'gld', val:0.20, desc:'GOLD+20%/Lv'},
+];
+
+// ===================== STAT CALC =====================
+function jm() { return JOBS[G.jobIdx].mul; }
+
+function skillBonus(eff) {
+  var b = 0;
+  SKILL_DEFS.forEach(function(s) { if(s.eff===eff) b += (G.skillLv[s.id]||0)*s.val; });
+  return b;
+}
+function eqBonus(stat) {
+  var b = 0;
+  ['weapon','armor','accessory'].forEach(function(k) {
+    var eq = G.equipped[k]; if(eq && eq.stat===stat) b += eq.v;
+  });
+  return b;
+}
+function petBonus(stat) {
+  var b = 0;
+  G.equippedPets.forEach(function(p) { if(p && p.stat===stat) b += p.v * p.lv; });
+  return b;
+}
+
+function calcAtk()  { return Math.floor(( 10 + G.upLv.atk*5  + G.ptSt.atk*3 + eqBonus('atk')  + petBonus('atk'))  * jm().atk  * (1 + skillBonus('atk'))); }
+function calcDef()  { return Math.floor((  5 + G.upLv.def*3  + G.ptSt.def*2 + eqBonus('def')  + petBonus('def'))  * jm().def  * (1 + skillBonus('def'))); }
+function calcMaxHp(){ return Math.floor((100 + G.upLv.hp*30  + G.ptSt.hp*20 + eqBonus('hp')   + petBonus('hp'))   * jm().hp   * (1 + skillBonus('hp'))); }
+function calcExpR() { return +((1 + G.upLv.expR*0.05  + eqBonus('expR')  + petBonus('expR'))  * jm().exp * (1 + skillBonus('exp'))).toFixed(2); }
+function calcGoldR(){ return +((1 + G.upLv.goldR*0.05 + eqBonus('goldR') + petBonus('goldR')) * jm().gld * (1 + skillBonus('gld'))).toFixed(2); }
+
+function fmt(n) {
+  if(n >= 1e9) return (n/1e9).toFixed(1)+'B';
+  if(n >= 1e6) return (n/1e6).toFixed(1)+'M';
+  if(n >= 1e3) return (n/1e3).toFixed(1)+'K';
+  return Math.floor(n).toString();
+}
+function expNeed(lv) { return Math.floor(100 * Math.pow(1.3, lv-1)); }
+function upCost(lv)  { return Math.floor(50  * Math.pow(1.4, lv)); }
+function rCost(lv)   { return Math.floor(100 * Math.pow(1.5, lv)); }
+function mCost(lv)   { return Math.floor(150 * Math.pow(1.6, lv)); }
+
+// ===================== ENEMY =====================
+var ENEMY_NAMES = ['ゴブリン','オーク','スライム','スケルトン','ウルフ','バンデット','ドラゴン','デーモン','リッチ','ワイバーン'];
+var ENEMY_ICOS  = ['👺','🧟','🐺','💀','🦇','👻','🐉','😈','👿','🔮'];
+var BOSS_LIST   = ['ゴブリン王','オーガ将軍','魔狼王フェンリル','竜騎士バルドル','魔将軍ザルゴス','暗黒騎士ヴァルム','真・魔王アビス'];
+
+function spawnEnemy() {
+  // 10の倍数ステージはボス
+  if(G.stage % 10 === 0) {
+    // 転職クエストに必要なボスを優先
+    var needed = null;
+    var curJob = JOBS[G.jobIdx];
+    curJob.quests.forEach(function(q) {
+      if(q.type==='boss' && (G.bossKills[q.boss]||0) < q.need) needed = q.boss;
+    });
+    G.eName = needed || BOSS_LIST[Math.floor(Math.random()*BOSS_LIST.length)];
+    G.eIco  = '👹';
+    G.eMax  = Math.floor(30 * Math.pow(1.15, G.stage-1) * 3);
+    addLog('⚠ ボス【'+G.eName+'】が現れた！', 'log-c');
+  } else {
+    var suf = G.stage>=15?'王':G.stage>=8?'長':'';
+    var idx = Math.floor(Math.random()*ENEMY_NAMES.length);
+    G.eName = ENEMY_NAMES[idx] + suf;
+    G.eIco  = ENEMY_ICOS[idx];
+    G.eMax  = Math.floor(30 * Math.pow(1.15, G.stage-1));
+  }
+  G.eHp = G.eMax;
+  document.getElementById('eSprite').textContent = G.eIco;
+  document.getElementById('eNametag').textContent = G.eName;
+}
+
+// ===================== CRIT =====================
+function doCrit(baseAtk) {
+  // デフォルトクリティカル(100%到達した最上位)
+  var defCrit = null;
+  for(var i = G.crits.length-1; i >= 0; i--) {
+    if(G.crits[i].rate >= 100) { defCrit = G.crits[i]; break; }
+  }
+  var applied = defCrit;
+  var startIdx = defCrit ? G.crits.indexOf(defCrit)+1 : 0;
+  for(var j = G.crits.length-1; j >= startIdx; j--) {
+    if(Math.random()*100 < G.crits[j].rate) { applied = G.crits[j]; break; }
+  }
+  var mul = applied ? applied.mul : 1.0;
+  // スキルクリ率ボーナス（クリ率全体に加算）
+  var critBonus = skillBonus('critB');
+  if(!applied && critBonus > 0 && Math.random()*100 < critBonus) {
+    applied = G.crits[0]; mul = G.crits[0].mul;
+  }
+  var dmg = Math.max(1, Math.floor(baseAtk * mul) - Math.floor(calcDef() * 0.3));
+  return {dmg:dmg, crit:applied};
+}
+
+// ===================== DAMAGE POP =====================
+function showDmgPop(dmg, crit, isPlayer) {
+  var area = document.getElementById('battleArea');
+  var el = document.createElement('div');
+  el.className = 'dmg-pop';
+  var sz = crit ? 16 + G.crits.indexOf(crit)*3 : 14;
+  var col = crit ? crit.col : (isPlayer ? '#ffffff' : '#ff6666');
+  var x = isPlayer ? '65%' : '30%';
+  el.style.cssText = 'font-size:'+sz+'px;color:'+col+';left:'+x+';top:38%;';
+  el.textContent = (isPlayer?'':'-') + fmt(dmg) + (crit ? ' '+crit.name.replace('クリティカル','⚡') : '');
+  area.appendChild(el);
+  setTimeout(function(){ el.remove(); }, 900);
+}
+function showGainPop(gold, exp) {
+  var area = document.getElementById('battleArea');
+  [['🪙+'+fmt(gold), '#e8c84a', '80px'], ['✨+'+fmt(exp), '#88ccff', '60px']].forEach(function(item) {
+    var el = document.createElement('div');
+    el.className = 'gain-pop';
+    el.style.cssText = 'color:'+item[1]+';right:14px;bottom:'+item[2]+';';
+    el.textContent = item[0];
+    area.appendChild(el);
+    setTimeout(function(){ el.remove(); }, 1200);
+  });
+}
+
+// ===================== BATTLE TICK =====================
+function battleTick() {
+  if(G.eHp <= 0) spawnEnemy();
+
+  // プレイヤー攻撃
+  var res = doCrit(calcAtk());
+  G.eHp = Math.max(0, G.eHp - res.dmg);
+  showDmgPop(res.dmg, res.crit, true);
+  var cls = !res.crit ? 'log-d' : (res.crit === G.crits[4] ? 'log-g' : 'log-c');
+  addLog(G.eName+'に '+fmt(res.dmg)+(res.crit?'【'+res.crit.name+'】':''), cls);
+
+  // 敵撃破
+  if(G.eHp <= 0) {
+    // ボス討伐チェック
+    BOSS_LIST.forEach(function(b) { if(G.eName===b) { G.bossKills[b] = (G.bossKills[b]||0)+1; addLog('💀 '+b+' 討伐！','log-c'); }});
+    var gGain = Math.floor((G.stage*10 + Math.random()*G.stage*5) * calcGoldR());
+    var eGain  = Math.floor(G.stage * 15 * calcExpR());
+    G.gold += gGain;
+    G.gem  += 10;
+    addExp(eGain);
+    showGainPop(gGain, eGain);
+    addLog(G.eName+'撃破！ +'+fmt(gGain)+'G +'+fmt(eGain)+'EXP +💎10', 'log-k');
+    G.stage++;
+    spawnEnemy();
+  } else {
+    // 敵攻撃
+    var eDmg = Math.max(1, Math.floor(G.eMax * 0.06) - Math.floor(calcDef() * 0.4));
+    G.hp = Math.max(0, G.hp - eDmg);
+    showDmgPop(eDmg, null, false);
+    if(G.hp <= 0) {
+      addLog('💀 倒された...1ステージ後退', 'log-n');
+      G.stage = Math.max(1, G.stage - 1);
+      G.hp = Math.floor(calcMaxHp() * 0.3);
+      spawnEnemy();
+    }
+  }
+
+  // ペット自動攻撃（3秒ごと、tickが3の倍数）
+  // → setIntervalで別処理
+
+  renderBattle();
+}
+
+function addExp(e) {
+  G.exp += e;
+  while(G.exp >= expNeed(G.lv)) {
+    G.exp -= expNeed(G.lv);
+    G.lv++;
+    G.pt += 3;
+    G.hp = calcMaxHp();
+    if(G.lv % 10 === 0) { G.skillPt++; addLog('⚡スキルPt+1（Lv'+G.lv+'）','log-l'); }
+    addLog('Lv'+G.lv+'！ Pt+3', 'log-l');
+  }
+}
+
+function addLog(msg, cls) {
+  var box = document.getElementById('logBox');
+  var p = document.createElement('p');
+  p.className = cls || 'log-n';
+  p.textContent = msg;
+  box.appendChild(p);
+  if(box.children.length > 100) box.removeChild(box.firstChild);
+  if(document.getElementById('pane-lg').classList.contains('active')) box.scrollTop = box.scrollHeight;
+}
+
+// ===================== RENDER =====================
+function renderBattle() {
+  var mhp = calcMaxHp();
+  if(G.hp > mhp) G.hp = mhp;
+  var en  = expNeed(G.lv);
+  var epct = Math.min(100, G.exp/en*100);
+
+  document.getElementById('tLv').textContent    = G.lv;
+  document.getElementById('tExpBar').style.width = epct+'%';
+  document.getElementById('tGold').textContent  = fmt(G.gold);
+  document.getElementById('tGem').textContent   = G.gem;
+  document.getElementById('sLv').textContent    = G.lv;
+  document.getElementById('sPt').textContent    = G.pt;
+  document.getElementById('stageLbl').textContent = 'STAGE '+G.stage;
+  document.getElementById('jobLbl').textContent  = JOBS[G.jobIdx].ico+' '+JOBS[G.jobIdx].name+' ▶';
+
+  // 敵HP
+  var epct2 = G.eMax>0 ? G.eHp/G.eMax*100 : 0;
+  document.getElementById('eHpBar').style.width  = epct2+'%';
+  document.getElementById('eHpTxt').textContent  = fmt(G.eHp)+'/'+fmt(G.eMax);
+  document.getElementById('eHpMini').style.width = epct2+'%';
+
+  // プレイヤーHP
+  var ppct = mhp>0 ? G.hp/mhp*100 : 0;
+  document.getElementById('pHpMini').style.width = ppct+'%';
+  document.getElementById('pHpBar').style.width  = ppct+'%';
+  document.getElementById('pHpTxt').textContent  = fmt(G.hp)+'/'+fmt(mhp);
+  document.getElementById('pExpBar').style.width = epct+'%';
+  document.getElementById('pExpTxt').textContent = fmt(G.exp)+'/'+fmt(en);
+}
+
+// ===================== IDLE =====================
+function updateIdleGold() {
+  var sec = Math.min((Date.now()-G.lastTime)/1000, 43200);
+  return Math.floor(sec * (calcAtk()*0.5 + G.stage*2) * calcGoldR());
+}
+
+// ===================== TAB SWITCH =====================
+var TABS = ['up','cr','pt','sk','pet','eq','st','lg'];
+function sw(key) {
+  document.querySelectorAll('.tab').forEach(function(t,i){ t.classList.toggle('active', TABS[i]===key); });
+  document.querySelectorAll('.tab-pane').forEach(function(p){ p.classList.remove('active'); });
+  document.getElementById('pane-'+key).classList.add('active');
+  if(key==='up')  buildUp();
+  if(key==='cr')  buildCrit();
+  if(key==='pt')  buildPt();
+  if(key==='sk')  buildSkill();
+  if(key==='pet') buildPet();
+  if(key==='eq')  buildEq();
+  if(key==='st')  buildStat();
+  if(key==='lg')  { var b=document.getElementById('logBox'); b.scrollTop=b.scrollHeight; }
+}
+function navActive(el) {
+  document.querySelectorAll('.nav-btn').forEach(function(b){ b.classList.remove('active'); });
+  el.classList.add('active');
+}
+
+// ===================== BUILD UP =====================
+var UP_DEFS = [
+  {k:'hp',   ico:'❤', bg:'#2a1010', nm:'HP強化',    cur:function(){return fmt(calcMaxHp());}, nxt:function(){return fmt(Math.floor((100+(G.upLv.hp+1)*30)*jm().hp));}},
+  {k:'atk',  ico:'⚔', bg:'#2a1010', nm:'攻撃力',    cur:function(){return fmt(calcAtk());},  nxt:function(){return '+';}},
+  {k:'def',  ico:'🛡', bg:'#101a2a', nm:'防御力',    cur:function(){return fmt(calcDef());},  nxt:function(){return '+';}},
+  {k:'expR', ico:'✨', bg:'#1a102a', nm:'EXP倍率',   cur:function(){return '×'+calcExpR();}, nxt:function(){return '+';}},
+  {k:'goldR',ico:'🪙', bg:'#2a1a00', nm:'GOLD倍率',  cur:function(){return '×'+calcGoldR();},nxt:function(){return '+';}},
+];
+function buildUp() {
+  // idle banner
+  var ig = updateIdleGold();
+  var html = '<div class="idle-banner">'
+    + '<div><div class="idle-gold">+'+fmt(ig)+' G</div><div class="idle-sub">放置収益（最大12時間）</div></div>'
+    + '<button class="idle-btn" onclick="claimIdle()">受け取る</button></div>';
+
+  UP_DEFS.forEach(function(u) {
+    var lv = G.upLv[u.k];
+    var cost = upCost(lv);
+    var can = G.gold >= cost;
+    var pct = Math.min(100, lv/400*100);
+    html += '<div class="up-row">'
+      + '<div class="up-ico" style="background:'+u.bg+'">'+u.ico+'</div>'
+      + '<div class="up-mid">'
+      + '<div class="up-name">'+u.nm+' <span style="font-size:9px;color:var(--text2)">Lv'+lv+'</span></div>'
+      + '<div class="up-stat">現在: '+u.cur()+'</div>'
+      + '<div class="up-bar-bg"><div class="up-bar-fill" style="width:'+pct+'%"></div></div>'
+      + '</div>'
+      + '<button class="gold-btn'+(can?'':' off')+'" onclick="doUp(\''+u.k+'\')" '+(can?'':'disabled')+'>'
+      + '🪙<span class="gold-btn-cost">'+fmt(cost)+'</span></button>'
+      + '</div>';
+  });
+  document.getElementById('pane-up').innerHTML = html;
+}
+function doUp(k) {
+  var cost = upCost(G.upLv[k]);
+  if(G.gold < cost) return;
+  G.gold -= cost; G.upLv[k]++;
+  buildUp(); renderBattle();
+}
+function claimIdle() {
+  var ig = updateIdleGold();
+  G.gold += ig;
+  G.lastTime = Date.now();
+  addLog('放置収益 G+'+fmt(ig)+'！', 'log-k');
+  buildUp(); renderBattle();
+}
+
+// ===================== BUILD CRIT =====================
+function buildCrit() {
+  var defIdx = -1;
+  for(var i=G.crits.length-1;i>=0;i--){ if(G.crits[i].rate>=100){defIdx=i;break;} }
+  var html = '<div style="font-size:9px;color:var(--text2);margin-bottom:8px;">発動率100%でデフォルト化。さらに上を目指せ！</div>';
+  G.crits.forEach(function(c, i) {
+    var isDef = i===defIdx;
+    var locked = i>0 && G.crits[i-1].rate < 10;
+    var rc = rCost(c.rateLv), mc = mCost(c.mulLv);
+    var canR = !locked && G.gold>=rc && c.rate<100;
+    var canM = !locked && G.gold>=mc;
+    html += '<div class="crit-row'+(isDef?' def-active':'')+'" style="'+(isDef?'border-color:'+c.col:'')+'">'
+      + '<div class="crit-dot" style="background:'+c.col+'"></div>'
+      + '<div class="crit-mid">'
+      + '<div class="crit-name" style="color:'+c.col+'">'
+      + c.name
+      + (isDef ? '<span class="def-badge">DEFAULT</span>' : '')
+      + (locked ? '<span class="lock-badge">🔒</span>' : '')
+      + '</div>'
+      + '<div class="crit-stat">率: '+c.rate.toFixed(1)+'%  倍率: ×'+c.mul.toFixed(1)+'</div>'
+      + '<div class="crit-rbar-bg"><div class="crit-rbar-fill" style="width:'+c.rate+'%;background:'+c.col+'"></div></div>'
+      + '</div>'
+      + '<div class="crit-btns">'
+      + '<button class="sm-btn'+(canR?'':' off')+'" onclick="upCritR('+i+')" '+(canR?'':'disabled')+'>'
+      + '率UP<span class="sm-btn-cost">🪙'+fmt(rc)+'</span></button>'
+      + '<button class="sm-btn'+(canM?'':' off')+'" onclick="upCritM('+i+')" '+(canM?'':'disabled')+'>'
+      + '威力UP<span class="sm-btn-cost">🪙'+fmt(mc)+'</span></button>'
+      + '</div></div>';
+  });
+  document.getElementById('pane-cr').innerHTML = html;
+}
+function upCritR(i) {
+  var c=G.crits[i]; if(c.rate>=100) return;
+  var cost=rCost(c.rateLv); if(G.gold<cost) return;
+  G.gold-=cost; c.rateLv++; c.rate=+(Math.min(100,c.rate+0.1)).toFixed(1);
+  buildCrit(); renderBattle();
+}
+function upCritM(i) {
+  var c=G.crits[i];
+  var cost=mCost(c.mulLv); if(G.gold<cost) return;
+  G.gold-=cost; c.mulLv++; c.mul=+(c.mul+0.2).toFixed(1);
+  buildCrit(); renderBattle();
+}
+
+// ===================== BUILD PT =====================
+var PT_DEFS = [
+  {k:'hp', ico:'❤', nm:'HP',  desc:function(){return 'Pt×20 HP | 現在: '+fmt(calcMaxHp());}},
+  {k:'atk',ico:'⚔', nm:'ATK', desc:function(){return 'Pt×3 ATK | 現在: '+fmt(calcAtk());}},
+  {k:'def',ico:'🛡', nm:'DEF', desc:function(){return 'Pt×2 DEF | 現在: '+fmt(calcDef());}},
+];
+function buildPt() {
+  var html = '<div class="pt-head"><div><div style="font-size:9px;color:var(--text2)">残りポイント</div>'
+    + '<div class="pt-num">'+G.pt+'</div></div>'
+    + '<div style="font-size:9px;color:var(--text2);text-align:right">Lv UP毎<br><b style="color:var(--green)">3pt</b>獲得</div></div>';
+  PT_DEFS.forEach(function(s) {
+    var can = G.pt > 0;
+    html += '<div class="pt-row'+(can?'':' off')+'" onclick="doPt(\''+s.k+'\')">'
+      + '<div class="pt-ico">'+s.ico+'</div>'
+      + '<div class="pt-info"><div class="pt-nm">'+s.nm+'</div><div class="pt-val">'+s.desc()+'</div></div>'
+      + '<div class="pt-plus">+</div></div>';
+  });
+  document.getElementById('pane-pt').innerHTML = html;
+}
+function doPt(k) {
+  if(G.pt<=0) return;
+  G.pt--; G.ptSt[k]++;
+  buildPt(); renderBattle();
+}
+
+// ===================== BUILD SKILL =====================
+function buildSkill() {
+  var html = '<div class="skill-pt-head">'
+    + '<div><div style="font-size:9px;color:var(--text2)">スキルポイント</div>'
+    + '<div class="skill-pt-num">'+G.skillPt+'</div></div>'
+    + '<div style="font-size:9px;color:var(--text2);text-align:right">転職時+5pt<br>Lv10毎+1pt</div></div>';
+  ['攻撃','防御','収益'].forEach(function(cat) {
+    html += '<div class="skill-cat-title">⚡ '+cat+'系スキル</div><div class="skill-grid">';
+    SKILL_DEFS.filter(function(s){return s.cat===cat;}).forEach(function(s) {
+      var lv = G.skillLv[s.id]||0;
+      var maxed = lv>=s.maxLv;
+      var unlocked = !s.req || (G.skillLv[s.req]||0)>=1;
+      var can = G.skillPt>=s.cost && !maxed && unlocked;
+      var cls = maxed?'maxed':lv>0?'on':unlocked?'':'locked';
+      html += '<div class="skill-node '+cls+'" onclick="doSkill(\''+s.id+'\')">'
+        + '<div class="skill-node-ico">'+s.ico+'</div>'
+        + '<div class="skill-node-nm">'+s.name+'</div>'
+        + '<div class="skill-node-desc">'+s.desc+'</div>'
+        + '<div class="skill-node-lv">'+(maxed?'MAX':'Lv'+lv+'/'+s.maxLv)+' Pt×'+s.cost+'</div>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+  document.getElementById('pane-sk').innerHTML = html;
+}
+function doSkill(id) {
+  var s = SKILL_DEFS.find(function(x){return x.id===id;});
+  if(!s) return;
+  if(s.req && !(G.skillLv[s.req]||0)) return;
+  if((G.skillLv[s.id]||0)>=s.maxLv) return;
+  if(G.skillPt < s.cost) return;
+  G.skillPt -= s.cost;
+  G.skillLv[s.id] = (G.skillLv[s.id]||0)+1;
+  addLog(s.name+' Lv'+G.skillLv[s.id]+'！','log-l');
+  buildSkill(); renderBattle();
+}
+
+// ===================== BUILD PET =====================
+function buildPet() {
+  var statNm = {atk:'ATK',def:'DEF',hp:'HP',expR:'EXP倍率',goldR:'GOLD倍率'};
+  var html = '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">装備中のペット（最大2体）</div>'
+    + '<div class="pet-slots">';
+  [0,1].forEach(function(i) {
+    var p = G.equippedPets[i];
+    html += '<div class="pet-slot'+(p?' filled':'')+'" onclick="selPetSlot('+i+')">'
+      + '<div class="pet-slot-ico">'+(p?p.ico:'❓')+'</div>'
+      + '<div class="pet-slot-nm">'+(p?p.name:'スロット'+(i+1))+'</div>'
+      + (p?'<div class="pet-slot-stat">+'+(p.v*p.lv)+' '+(statNm[p.stat]||p.stat)+'</div>':'')
+      + '</div>';
+  });
+  html += '</div>';
+  // ペットボーナス
+  var ab=petBonus('atk'),db=petBonus('def'),hb=petBonus('hp');
+  html += '<div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px;margin-bottom:10px;font-size:10px;">'
+    + 'ペットボーナス: ATK+'+ab+' DEF+'+db+' HP+'+hb+'</div>';
+  // 所持ペット
+  html += '<div style="font-size:10px;color:var(--text2);margin-bottom:6px;">所持ペット ('+G.petInv.length+'体)</div>';
+  if(G.petInv.length===0) {
+    html += '<div style="text-align:center;color:var(--text2);padding:16px;font-size:11px;">ペットを持っていない<br>ペットガチャで入手しよう！</div>';
+  } else {
+    html += '<div class="pet-inv-grid">';
+    G.petInv.forEach(function(p) {
+      var isSel = G._selPet && G._selPet.uid===p.uid;
+      html += '<div class="pet-card'+(isSel?' sel':'')+'" onclick="selPetCard(\''+p.uid+'\')"><div class="pet-card-ico">'+p.ico+'</div>'
+        + '<div class="pet-card-rar" style="background:'+p.rar.col+'22;color:'+p.rar.col+'">'+p.rar.name+'</div>'
+        + '<div class="pet-card-nm">'+p.name+'</div>'
+        + '<div class="pet-card-stat">+'+(p.v*p.lv)+' '+(statNm[p.stat]||p.stat)+'</div></div>';
+    });
+    html += '</div>';
+    if(G._selPet && G._selPetSlot!==null) {
+      html += '<button class="pet-equip-btn" onclick="doPetEquip()">スロット'+(G._selPetSlot+1)+'に '+G._selPet.name+' を装備</button>';
+    }
+  }
+  html += '<button class="pet-gacha-btn" onclick="doPetGacha()">🐾 ペットガチャ（💎50）</button>';
+  document.getElementById('pane-pet').innerHTML = html;
+}
+function selPetSlot(i) { G._selPetSlot=i; buildPet(); }
+function selPetCard(uid) { G._selPet=G.petInv.find(function(p){return p.uid==uid;})||null; buildPet(); }
+function doPetEquip() {
+  if(!G._selPet||G._selPetSlot===null) return;
+  G.equippedPets[G._selPetSlot]=G._selPet;
+  addLog(G._selPet.name+'をスロット'+(G._selPetSlot+1)+'に装備！','log-k');
+  G._selPet=null; G._selPetSlot=null;
+  buildPet(); renderBattle();
+}
+function doPetGacha() {
+  if(G.gem<50){ addLog('💎が足りない！(ペットガチャ:50)','log-n'); return; }
+  G.gem-=50;
+  var rar = rollRarity();
+  var ri = RARITY.indexOf(rar);
+  var base = PETS[Math.min(ri*2+Math.floor(Math.random()*2), PETS.length-1)];
+  var pet = Object.assign({}, base, {rar:rar, lv:ri+1, uid:Date.now()+Math.random()});
+  G.petInv.push(pet);
+  addLog('🐾 '+pet.name+'【'+pet.rar.name+'】獲得！','log-k');
+  buildPet(); renderBattle();
+}
+
+// ===================== BUILD EQ =====================
+var EQ_SLOTS = [{key:'weapon',lbl:'武器',ico:'⚔'},{key:'armor',lbl:'防具',ico:'🛡'},{key:'accessory',lbl:'アクセ',ico:'💍'}];
+function buildEq() {
+  var statNm = {atk:'ATK',def:'DEF',hp:'HP',expR:'EXP倍率',goldR:'GOLD倍率'};
+  var html = '';
+  EQ_SLOTS.forEach(function(s) {
+    var eq = G.equipped[s.key];
+    var bc = eq ? 'border-color:'+eq.rar.col+';' : '';
+    html += '<div class="eq-slot">'
+      + '<div class="eq-slot-ico" style="'+bc+'">'+(eq?eq.ico:s.ico)+'</div>'
+      + '<div class="eq-slot-info">'
+      + '<div class="eq-slot-type">'+s.lbl+'</div>'
+      + '<div class="eq-slot-nm">'+(eq?eq.name:'未装備')+'</div>'
+      + (eq?'<div class="eq-slot-stat">+'+eq.v+' '+(statNm[eq.stat]||eq.stat)+'</div>':'')
+      + '</div>'
+      + '<button class="eq-change-btn" onclick="openEqModal(\''+s.key+'\')">変更</button>'
+      + '</div>';
+  });
+  html += '<div style="font-size:10px;color:var(--text2);margin-top:4px;">所持: '+G.inventory.length+'件 | '
+    + '<button style="background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:6px;padding:4px 10px;font-size:10px;font-weight:900;color:#000;cursor:pointer;" onclick="openGacha()">ガチャを回す</button></div>';
+  document.getElementById('pane-eq').innerHTML = html;
+}
+function openEqModal(slot) {
+  G._eqSlot=slot; G._selInv=null;
+  var lbl={weapon:'武器',armor:'防具',accessory:'アクセ'};
+  document.getElementById('eqModalTitle').textContent = lbl[slot]+' 変更';
+  buildEqInv(slot);
+  document.getElementById('eqOverlay').classList.add('open');
+}
+function closeEqModal() { document.getElementById('eqOverlay').classList.remove('open'); }
+function buildEqInv(slot) {
+  var items = G.inventory.filter(function(i){return i.slot===slot;});
+  var statNm = {atk:'ATK',def:'DEF',hp:'HP',expR:'EXP倍率',goldR:'GOLD倍率'};
+  var html = '';
+  if(!items.length) {
+    html = '<div style="grid-column:1/-1;text-align:center;color:var(--text2);padding:20px;font-size:11px;">該当装備なし<br>ガチャで入手しよう！</div>';
+  } else {
+    items.forEach(function(item) {
+      var isSel = G._selInv && G._selInv.uid===item.uid;
+      html += '<div class="inv-card r'+item.rar.id+(isSel?' sel':'')+'" onclick="selInv(\''+item.uid+'\')">'
+        + '<div class="inv-card-ico">'+item.ico+'</div>'
+        + '<div class="inv-card-rar" style="background:'+item.rar.col+'22;color:'+item.rar.col+'">'+item.rar.name+'</div>'
+        + '<div class="inv-card-nm">'+item.name+'</div>'
+        + '<div class="inv-card-stat">+'+item.v+' '+(statNm[item.stat]||item.stat)+'</div>'
+        + '</div>';
+    });
+  }
+  document.getElementById('eqInvGrid').innerHTML = html;
+}
+function selInv(uid) { G._selInv=G.inventory.find(function(i){return i.uid==uid;})||null; buildEqInv(G._eqSlot); }
+function doEquip() {
+  if(!G._selInv||!G._eqSlot) return;
+  G.equipped[G._eqSlot]=G._selInv;
+  closeEqModal();
+  addLog(G._selInv.name+'を装備！','log-k');
+  buildEq(); renderBattle();
+}
+
+// ===================== BUILD STAT =====================
+function buildStat() {
+  document.getElementById('pane-st').innerHTML =
+    '<div class="stat-grid">'
+    + '<div class="stat-card"><div class="stat-card-lbl">ATK</div><div class="stat-card-val c-atk">'+fmt(calcAtk())+'</div></div>'
+    + '<div class="stat-card"><div class="stat-card-lbl">DEF</div><div class="stat-card-val c-def">'+fmt(calcDef())+'</div></div>'
+    + '<div class="stat-card"><div class="stat-card-lbl">MAX HP</div><div class="stat-card-val c-hp">'+fmt(calcMaxHp())+'</div></div>'
+    + '<div class="stat-card"><div class="stat-card-lbl">EXP倍率</div><div class="stat-card-val c-exp">×'+calcExpR()+'</div></div>'
+    + '<div class="stat-card"><div class="stat-card-lbl">GOLD倍率</div><div class="stat-card-val c-gld">×'+calcGoldR()+'</div></div>'
+    + '<div class="stat-card"><div class="stat-card-lbl">職業</div><div style="font-size:11px;font-weight:700;color:var(--accent2);margin-top:4px;">'+JOBS[G.jobIdx].ico+' '+JOBS[G.jobIdx].name+'</div></div>'
+    + '</div>';
+}
+
+// ===================== GACHA =====================
+var GACHA_LV_NEED = 10, GACHA_LV_MAX = 20;
+function getGachaRates(glv) {
+  var rates = {N:55,R:30,E:14,L:0,M:0};
+  if(glv>=6)  { rates.L=(glv-5)*0.8; rates.N=Math.max(5,rates.N-1); }
+  if(glv>=11) { rates.M=(glv-10)*0.3; }
+  var bonus = Math.min(glv-1,10);
+  rates.N = Math.max(5, rates.N - bonus*1.5);
+  rates.R = Math.min(45, rates.R + bonus*0.8);
+  rates.E = Math.min(30, rates.E + bonus*0.5);
+  var total = rates.N+rates.R+rates.E+rates.L+rates.M;
+  Object.keys(rates).forEach(function(k){ rates[k]=rates[k]/total*100; });
+  return rates;
+}
+function rollRarity() {
+  var rates = getGachaRates(G.gachaLv);
+  var r = Math.random()*100, acc=0;
+  for(var i=0;i<RARITY.length;i++) {
+    if(RARITY[i].unlockLv > G.gachaLv) continue;
+    acc += rates[RARITY[i].id];
+    if(r < acc) return RARITY[i];
+  }
+  return RARITY[0];
+}
+function rollItem() {
+  G.gachaTotal++; G.gachaExp++;
+  if(G.gachaExp >= GACHA_LV_NEED && G.gachaLv < GACHA_LV_MAX) {
+    G.gachaExp=0; G.gachaLv++;
+    if(G.gachaLv===6)  addLog('🎉 レジェンドが解放！','log-g');
+    if(G.gachaLv===11) addLog('🎉 ミシックが解放！','log-g');
+  }
+  var rar = rollRarity();
+  var ri = RARITY.indexOf(rar);
+  var slotKeys = Object.keys(ITEMS);
+  var slot = slotKeys[Math.floor(Math.random()*slotKeys.length)];
+  var pool = ITEMS[slot];
+  var base = pool[Math.min(ri, pool.length-1)];
+  return Object.assign({}, base, {rar:rar, slot:slot, uid:Date.now()+Math.random()});
+}
+function doGacha(n) {
+  var cost=30*n;
+  if(G.gem<cost){ addLog('💎が足りない！','log-n'); return; }
+  G.gem-=cost;
+  var results=[];
+  for(var i=0;i<n;i++) results.push(rollItem());
+  G.inventory.push.apply(G.inventory, results);
+  var show=results.slice(-10);
+  var el=document.getElementById('gResult');
+  el.innerHTML='';
+  show.forEach(function(item,i) {
+    setTimeout(function(){
+      var c=document.createElement('div');
+      c.className='r-card r'+item.rar.id;
+      c.innerHTML='<div class="r-card-ico">'+item.ico+'</div>'
+        +'<div class="r-card-rar">'+item.rar.name+'</div>'
+        +'<div class="r-card-nm">'+item.name+'</div>';
+      el.appendChild(c);
+    }, i*80);
+  });
+  results.filter(function(r){return r.rar.id==='M';}).forEach(function(r){ addLog('🎉 '+r.name+' [ミシック]獲得！','log-g'); });
+  updateGachaLv(); renderBattle();
+}
+function updateGachaLv() {
+  var pct=G.gachaExp/GACHA_LV_NEED*100;
+  document.getElementById('gLvNum').textContent=G.gachaLv;
+  document.getElementById('gLvBar').style.width=pct+'%';
+  document.getElementById('gTotal').textContent=G.gachaTotal;
+  var left=GACHA_LV_NEED-G.gachaExp;
+  document.getElementById('gLvInfo').textContent=G.gachaLv>=GACHA_LV_MAX?'MAX！':'次のLvまで: '+left+'回';
+  var rates=getGachaRates(G.gachaLv);
+  var info=RARITY.filter(function(r){return r.unlockLv<=G.gachaLv;}).map(function(r){return r.name+':'+rates[r.id].toFixed(1)+'%';}).join('  ');
+  document.getElementById('gRateInfo').textContent=info;
+}
+function openGacha() { updateGachaLv(); document.getElementById('gResult').innerHTML=''; document.getElementById('gachaOverlay').classList.add('open'); }
+function closeGacha() { document.getElementById('gachaOverlay').classList.remove('open'); }
+
+// ===================== JOB MODAL =====================
+function openJobModal() { buildJobModal(); document.getElementById('jobOverlay').classList.add('open'); }
+function closeJobModal() { document.getElementById('jobOverlay').classList.remove('open'); }
+function buildJobModal() {
+  var cur=JOBS[G.jobIdx], next=JOBS[G.jobIdx+1];
+  var html='<div class="job-cur"><div class="job-cur-ico">'+cur.ico+'</div>'
+    +'<div><div class="job-cur-nm">'+cur.name+'</div>'
+    +'<div class="job-cur-sub">'+(G.jobIdx+1)+' / '+JOBS.length+'</div></div></div>';
+  if(!next){ html+='<div class="job-max">🎉 最強の職業！これ以上の転職はない</div>'; document.getElementById('jobBody').innerHTML=html; return; }
+  var mulKeys={hp:'HP',atk:'ATK',def:'DEF',gld:'GOLD',exp:'EXP'};
+  var chips=Object.entries(next.mul).map(function(e){return '<span class="job-mul-chip">'+mulKeys[e[0]]+' ×'+e[1].toFixed(1)+'</span>';}).join('');
+  html+='<div class="job-next-card"><div class="job-next-lbl">▶ 次の職業</div>'
+    +'<div class="job-next-nm">'+next.ico+' '+next.name+'</div>'
+    +'<div class="job-mul-row">'+chips+'</div>'
+    +'<div class="job-next-lbl">転職クエスト</div>';
+  var progs=cur.quests.map(function(q){
+    if(q.type==='stage') return {q:q, cur:Math.min(G.stage-1,q.need), done:G.stage-1>=q.need};
+    return {q:q, cur:G.bossKills[q.boss]||0, done:(G.bossKills[q.boss]||0)>=q.need};
+  });
+  progs.forEach(function(p){
+    html+='<div class="quest-row'+(p.done?' done':'')+'">'
+      +'<div class="quest-check">'+(p.done?'✓':'')+'</div>'
+      +'<div><div class="quest-txt">'+p.q.label+'</div>'
+      +'<div class="quest-prog">'+(p.q.type==='stage'?'ステージ <b>'+p.cur+'</b>/'+p.q.need:'<b>'+p.cur+'</b>/'+p.q.need+' 体')+'</div>'
+      +'</div></div>';
+  });
+  var ready=progs.every(function(p){return p.done;});
+  html+='</div><button class="job-tf-btn'+(ready?' ready':'')+'" onclick="doTransfer()">'+
+    (ready?'⚔ '+next.name+' に転職する！':'🔒 クエストを完了して転職')+'</button>';
+  document.getElementById('jobBody').innerHTML=html;
+}
+function doTransfer() {
+  var next=JOBS[G.jobIdx+1]; if(!next) return;
+  var cur=JOBS[G.jobIdx];
+  var progs=cur.quests.map(function(q){
+    return q.type==='stage'?G.stage-1>=q.need:(G.bossKills[q.boss]||0)>=q.need;
+  });
+  if(!progs.every(Boolean)) return;
+  G.jobIdx++;
+  G.skillPt+=5;
+  G.hp=calcMaxHp();
+  addLog('🎉 【'+next.name+'】に転職！ スキルPt+5','log-g');
+  buildJobModal(); renderBattle();
+}
+
+// ===================== SAVE / LOAD =====================
+function saveGame() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      gold:G.gold, gem:G.gem, lv:G.lv, exp:G.exp, pt:G.pt, skillPt:G.skillPt,
+      hp:G.hp, stage:G.stage, lastTime:Date.now(),
+      upLv:G.upLv, ptSt:G.ptSt, skillLv:G.skillLv,
+      crits:G.crits.map(function(c){return {rate:c.rate,mul:c.mul,rateLv:c.rateLv,mulLv:c.mulLv};}),
+      jobIdx:G.jobIdx, bossKills:G.bossKills,
+      gachaLv:G.gachaLv, gachaExp:G.gachaExp, gachaTotal:G.gachaTotal,
+      inventory:G.inventory, equipped:G.equipped,
+      petInv:G.petInv, equippedPets:G.equippedPets,
+    }));
+  } catch(e) {}
+}
+function loadGame() {
+  try {
+    var raw=localStorage.getItem(SAVE_KEY); if(!raw) return;
+    var d=JSON.parse(raw);
+    G.gold=d.gold||0; G.gem=d.gem||0; G.lv=d.lv||1; G.exp=d.exp||0;
+    G.pt=d.pt||0; G.skillPt=d.skillPt||0;
+    G.stage=d.stage||1; G.lastTime=d.lastTime||Date.now();
+    if(d.upLv) G.upLv=d.upLv;
+    if(d.ptSt) G.ptSt=d.ptSt;
+    if(d.skillLv) G.skillLv=d.skillLv;
+    if(d.crits) d.crits.forEach(function(s,i){ if(G.crits[i]) Object.assign(G.crits[i],s); });
+    G.jobIdx=d.jobIdx||0; G.bossKills=d.bossKills||{};
+    G.gachaLv=d.gachaLv||1; G.gachaExp=d.gachaExp||0; G.gachaTotal=d.gachaTotal||0;
+    G.inventory=d.inventory||[]; G.equipped=d.equipped||{weapon:null,armor:null,accessory:null};
+    G.petInv=d.petInv||[]; G.equippedPets=d.equippedPets||[null,null];
+    addLog('💾 セーブデータ読み込み完了','log-k');
+  } catch(e) { addLog('セーブデータ読み込み失敗','log-n'); }
+}
+
+// ===================== PET AUTO ATTACK =====================
+var petTickCount=0;
+setInterval(function(){
+  petTickCount++;
+  if(petTickCount%3!==0 || G.eHp<=0) return;
+  var pb=petBonus('atk'); if(pb<=0) return;
+  G.eHp=Math.max(0,G.eHp-pb);
+  var area=document.getElementById('battleArea');
+  var el=document.createElement('div');
+  el.className='dmg-pop';
+  el.style.cssText='font-size:11px;color:#88ddff;right:20%;top:50%;';
+  el.textContent='🐾'+pb;
+  area.appendChild(el);
+  setTimeout(function(){el.remove();},900);
+  renderBattle();
+},1000);
+
+// ===================== INIT =====================
+function init() {
+  loadGame();
+  G.hp = calcMaxHp();
+  spawnEnemy();
+  buildUp();
+  renderBattle();
+  addLog('冒険が始まった！','log-k');
+  setInterval(battleTick, 1000);
+  setInterval(saveGame, 10000);
+  setInterval(function(){ if(document.getElementById('pane-up').classList.contains('active')) buildUp(); }, 5000);
+}
+init();
+</script>
+</body>
+</html>
